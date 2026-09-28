@@ -6,6 +6,7 @@ on:
     paths:
       - "potree-static-site/**"
       - ".github/workflows/deploy-pages.yml"
+  # Manually re-run from the Actions tab if a push-triggered run fails (e.g. repo was private).
   workflow_dispatch:
 
 permissions:
