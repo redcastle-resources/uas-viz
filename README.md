@@ -1,0 +1,166 @@
+# uas_viz
+
+Tools, static sites, and upload helpers for UAV visualization workflows. The
+repository currently supports two main publishing paths:
+
+- `dem-static-site/` for Cloud Optimized GeoTIFF (COG) raster viewers.
+- `potree-static-site/` for Potree point cloud viewers.
+
+The repo is intentionally lightweight: there is no central web application or
+backend service. Most work happens with local Python scripts, GDAL utilities,
+and static hosting.
+
+## Requirements
+
+Install the following before working in this repo:
+
+- Python 3.10 or newer.
+- GDAL command-line tools and Python bindings (`gdal`, `osgeo`).
+- Google Cloud SDK, which provides `gsutil`.
+- Node.js 18+ if you want a general-purpose static server such as `npx serve`
+  or plan to add front-end tooling later.
+- A modern browser with HTTP Range request support.
+
+On Windows, the easiest setup is usually:
+
+- Python from python.org, Anaconda, Miniconda, or an existing virtual
+  environment.
+- GDAL from a distribution that includes both the CLI tools and Python
+  bindings. The repo’s `requirements.txt` notes the common Windows wheel
+  approach (`gdal / osgeo from cgohlke whl`).
+- Google Cloud SDK installed separately so `gsutil` is on `PATH`.
+
+## Quick Start
+
+1. Clone the repository and open it in VS Code.
+2. Create or activate a Python environment.
+3. Install the Python dependencies you need for your workflow.
+4. Verify that `gdalinfo` and `gsutil` are available from a terminal.
+5. Use the site-specific instructions below for DEM rasters or Potree clouds.
+
+Example environment check on Windows PowerShell:
+
+```powershell
+python --version
+gdalinfo --version
+gsutil version -l
+node --version
+```
+
+## Python Environment
+
+The repo does not currently ship a single pinned package set. The helper
+scripts are small and mostly rely on the standard library plus external tools.
+If you want a dedicated environment, create one and install whatever your
+workflow requires, for example GDAL bindings and any raster-processing packages
+you use upstream.
+
+## DEM Static Site
+
+[`dem-static-site/`](dem-static-site/) hosts a simple raster comparison viewer
+for pre-treatment, post-treatment, and difference COGs.
+
+Typical workflow:
+
+1. Generate or prepare three `EPSG:3857` COGs with GDAL.
+2. Upload them to a bucket or object store that supports HTTP Range requests.
+3. Update `dem-static-site/config.js` with the hosted COG URL prefix and map
+   view.
+4. Serve the folder locally with the bundled range-aware server.
+
+Example COG creation commands:
+
+```bash
+gdal_edit.py -a_nodata nan pre_treatment_source.tif
+
+gdalwarp pre_treatment_source.tif pre_treatment.tif -of COG \
+  -co TILING_SCHEME=GoogleMapsCompatible \
+  -co COMPRESS=LERC -co MAX_Z_ERROR=0.1 \
+  -co RESAMPLING=BILINEAR -co OVERVIEW_RESAMPLING=AVERAGE \
+  -co OVERVIEWS=IGNORE_EXISTING -co ADD_ALPHA=NO
+```
+
+To upload local rasters to Google Cloud Storage, use the helper script:
+
+```powershell
+python tools/upload_cogs_to_gcs.py .\data -d gs://uas-viz/dem_tifs
+```
+
+Local serving:
+
+```powershell
+cd dem-static-site
+./serve.ps1
+```
+
+Then open `http://localhost:8080/`.
+
+## Potree Static Site
+
+[`potree-static-site/`](potree-static-site/) is the minimal deployment pattern
+for a Potree point cloud viewer.
+
+Typical workflow:
+
+1. Copy the Potree distribution into `potree-static-site/vendor/potree/`.
+2. Copy generated Potree point cloud output into `potree-static-site/pointclouds/`.
+3. Serve the folder locally with the bundled range-aware server.
+4. Publish the folder to a static host when ready.
+
+Local serving:
+
+```powershell
+cd potree-static-site
+./serve.ps1
+```
+
+Then open `http://localhost:8080/`.
+
+## Google Cloud Storage Uploads
+
+[`tools/upload_cogs_to_gcs.py`](tools/upload_cogs_to_gcs.py) uploads `.tif`
+and `.tiff` files to a `gs://` prefix while preserving subdirectory structure.
+It sets `Content-Type: image/tiff` and a long-lived cache policy by default.
+
+The script requires `gsutil` and expects a destination that starts with
+`gs://`.
+
+Example:
+
+```powershell
+python tools/upload_cogs_to_gcs.py D:\FY26\uas\cogs -d gs://uas-viz/cogs
+```
+
+## Range-Supporting Local Servers
+
+Both static sites include a small `serve_range.py` helper. Use it for local
+development whenever browser code needs HTTP Range requests. Plain
+`http.server` is not enough for COG reads.
+
+The bundled `serve.ps1` scripts simply change into the folder and launch the
+Python range server on port 8080.
+
+## Repository Layout
+
+```text
+README.md
+requirements.txt
+dem-static-site/
+landing-page/
+potree-static-site/
+tools/
+```
+
+## Deployment
+
+The static sites are designed to be published as plain files. The repo already
+follows a GitHub Pages style layout with a landing page, a DEM viewer, and a
+Potree viewer.
+
+## Notes
+
+- `requirements.txt` currently documents the small Python dependency surface
+  used by the helper scripts.
+- `dem-static-site/README.md` contains more detail on the DEM workflow.
+- `potree-static-site/README.md` contains more detail on the point cloud
+  workflow.

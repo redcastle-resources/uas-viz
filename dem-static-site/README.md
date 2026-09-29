@@ -60,6 +60,16 @@ gs://uas-viz/dem_tifs/post_treatment.tif
 gs://uas-viz/dem_tifs/difference.tif
 ```
 
+If you want a small helper script for GCS uploads, use:
+
+```powershell
+python ..\tools\upload_cogs_to_gcs.py .\data -d gs://uas-viz/dem_tifs
+```
+
+The script preserves any subdirectory structure under the local input folder
+and sets `Content-Type: image/tiff` plus a long-lived cache policy on each
+uploaded object.
+
 The bucket's CORS config (see `potree-static-site/gcs-cors.json`) already
 allows `Range`/`Accept-Ranges`/`Content-Range` headers from any origin, so no
 CORS changes should be needed if you reuse that bucket.
