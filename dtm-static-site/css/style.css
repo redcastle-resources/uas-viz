@@ -125,3 +125,16 @@ body {
   margin-top: 4px;
   color: var(--muted);
 }
+
+.hover-tooltip {
+  position: absolute;
+  z-index: 20;
+  display: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  font-size: 12px;
+  white-space: nowrap;
+  pointer-events: none;
+}

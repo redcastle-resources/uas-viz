@@ -3,7 +3,7 @@
 Tools, static sites, and upload helpers for UAV visualization workflows. The
 repository currently supports two main publishing paths:
 
-- `dem-static-site/` for Cloud Optimized GeoTIFF (COG) raster viewers.
+- `dtm-static-site/` for Cloud Optimized GeoTIFF (COG) raster viewers.
 - `potree-static-site/` for Potree point cloud viewers.
 
 The repo is intentionally lightweight: there is no central web application or
@@ -36,7 +36,7 @@ On Windows, the easiest setup is usually:
 2. Create or activate a Python environment.
 3. Install the Python dependencies you need for your workflow.
 4. Verify that `gdalinfo` and `gsutil` are available from a terminal.
-5. Use the site-specific instructions below for DEM rasters or Potree clouds.
+5. Use the site-specific instructions below for DTM rasters or Potree clouds.
 
 Example environment check on Windows PowerShell:
 
@@ -55,16 +55,16 @@ If you want a dedicated environment, create one and install whatever your
 workflow requires, for example GDAL bindings and any raster-processing packages
 you use upstream.
 
-## DEM Static Site
+## DTM Static Site
 
-[`dem-static-site/`](dem-static-site/) hosts a simple raster comparison viewer
+[`dtm-static-site/`](dtm-static-site/) hosts a simple raster comparison viewer
 for pre-treatment, post-treatment, and difference COGs.
 
 Typical workflow:
 
-1. Generate or prepare three `EPSG:3857` COGs with GDAL.
+1. Generate or prepare three `EPSG:3857` COGs (pre-treatment, post-treatment, and difference) with GDAL.
 2. Upload them to a bucket or object store that supports HTTP Range requests.
-3. Update `dem-static-site/config.js` with the hosted COG URL prefix and map
+3. Update `dtm-static-site/config.js` with the hosted COG URL prefix and map
    view.
 4. Serve the folder locally with the bundled range-aware server.
 
@@ -102,7 +102,7 @@ python tools/upload_cogs_to_gcs.py D:\FY26\uas\cogs -d gs://uas-viz/cogs
 Local serving:
 
 ```powershell
-cd dem-static-site
+cd dtm-static-site
 ./serve.ps1
 ```
 
@@ -160,7 +160,7 @@ Python range server on port 8080.
 ```text
 README.md
 requirements.txt
-dem-static-site/
+dtm-static-site/
 landing-page/
 potree-static-site/
 tools/
@@ -169,13 +169,13 @@ tools/
 ## Deployment
 
 The static sites are designed to be published as plain files. The repo already
-follows a GitHub Pages style layout with a landing page, a DEM viewer, and a
+follows a GitHub Pages style layout with a landing page, a DTM viewer, and a
 Potree viewer.
 
 ## Notes
 
 - `requirements.txt` currently documents the small Python dependency surface
   used by the helper scripts.
-- `dem-static-site/README.md` contains more detail on the DEM workflow.
+- `dtm-static-site/README.md` contains more detail on the DTM workflow.
 - `potree-static-site/README.md` contains more detail on the point cloud
   workflow.

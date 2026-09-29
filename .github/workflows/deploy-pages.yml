@@ -5,7 +5,7 @@ on:
     branches: [main]
     paths:
       - "potree-static-site/**"
-      - "dem-static-site/**"
+      - "dtm-static-site/**"
       - "landing-page/**"
       - ".github/workflows/deploy-pages.yml"
   # Manually re-run from the Actions tab if a push-triggered run fails (e.g. repo was private).
@@ -33,12 +33,12 @@ jobs:
       # Combine the landing page + both viewers into one artifact:
       #   /            -> landing-page/index.html
       #   /potree/...  -> potree-static-site/
-      #   /dem/...     -> dem-static-site/
+      #   /dtm/...     -> dtm-static-site/
       - name: Assemble combined site
         run: |
-          mkdir -p _site/potree _site/dem
+          mkdir -p _site/potree _site/dtm
           cp -r potree-static-site/. _site/potree/
-          cp -r dem-static-site/. _site/dem/
+          cp -r dtm-static-site/. _site/dtm/
           cp landing-page/index.html _site/index.html
 
       - name: Configure Pages

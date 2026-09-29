@@ -1,7 +1,7 @@
-# Lightweight DEM Static Site (MapLibre GL + COG)
+# Lightweight DTM Static Site (MapLibre GL + COG)
 
-A minimal static viewer for comparing 3 raster layers — pre-treatment DEM,
-post-treatment DEM, and their difference — using [MapLibre GL JS](https://maplibre.org/maplibre-gl-js/docs/)
+A minimal static viewer for comparing 3 raster layers — pre-treatment DTM,
+post-treatment DTM, and their difference — using [MapLibre GL JS](https://maplibre.org/maplibre-gl-js/docs/)
 with a plain raster XYZ basemap (CARTO Positron, no API key) and the
 [`maplibre-cog-protocol`](https://github.com/geomatico/maplibre-cog-protocol)
 plugin. No tile server or backend required: the rasters are read directly as
@@ -18,7 +18,7 @@ of the way of the color-ramp overlays.
 ## Folder layout
 
 ```text
-dem-static-site/
+dtm-static-site/
 ├── index.html
 ├── config.js          # <- edit this to point at your 3 COGs
 ├── css/style.css
@@ -129,7 +129,7 @@ COG reads use HTTP Range requests even for local files, so use the bundled
 range-supporting server (Python's plain `http.server` does not support Range):
 
 ```powershell
-cd dem-static-site
+cd dtm-static-site
 ./serve.ps1
 ```
 
@@ -142,7 +142,7 @@ To test against local files instead of the hosted bucket, drop your `.tif`s in
 
 This folder is deployed alongside the Potree viewer by
 `.github/workflows/deploy-pages.yml`, which publishes it to GitHub Pages at
-`/dem/` (Potree lives at `/potree/`, with a small landing page at `/`).
+`/dtm/` (Potree lives at `/potree/`, with a small landing page at `/`).
 
 ## Notes / next steps
 

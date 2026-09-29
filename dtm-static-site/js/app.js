@@ -1,7 +1,7 @@
 (() => {
-  const config = window.DEM_CONFIG;
+  const config = window.DTM_CONFIG;
   if (!config) {
-    console.error('Missing DEM_CONFIG — make sure config.js loads before js/app.js');
+    console.error('Missing DTM_CONFIG — make sure config.js loads before js/app.js');
     return;
   }
 
@@ -19,6 +19,12 @@
   function cogUrlFor(layer) {
     const ramp = `${layer.colorRamp},${layer.min},${layer.max},c${layer.reverse ? '-' : ''}`;
     return `cog://${config.cogBaseUrl}/${layer.file}#color:${ramp}`;
+  }
+
+  // locationValues() reads raw pixel data itself, so it wants the plain COG
+  // url — no `cog://` protocol prefix and no `#color:` ramp hash.
+  function rawUrlFor(layer) {
+    return `${config.cogBaseUrl}/${layer.file}`;
   }
 
   // Layers sharing a `group` key are collapsed into a single panel entry/checkbox
@@ -130,6 +136,62 @@
       }
     });
   }
+
+  // Shows the raster value under the cursor for whichever layer(s) are active.
+  // Throttled (rather than run on every mousemove) since each lookup decodes
+  // COG tile data; requests are cached internally so repeated hovers are cheap.
+  const tooltipEl = document.getElementById('hover-tooltip');
+  let hoverTimeout = null;
+  let hoverRequestId = 0;
+
+  function hideTooltip() {
+    tooltipEl.style.display = 'none';
+  }
+
+  function updateTooltip(e) {
+    const activeGroup = groups.find((g) => g.key === activeGroupKey);
+    if (!activeGroup) {
+      hideTooltip();
+      return;
+    }
+
+    const requestId = ++hoverRequestId;
+    const { lng, lat } = e.lngLat;
+    const zoom = map.getZoom();
+    const location = { latitude: lat, longitude: lng };
+
+    Promise.all(
+      activeGroup.layers.map((layer) =>
+        MaplibreCOGProtocol.locationValues(rawUrlFor(layer), location, zoom)
+          .then((values) => ({ layer, value: values && values[0] }))
+          .catch(() => ({ layer, value: NaN }))
+      )
+    ).then((results) => {
+      if (requestId !== hoverRequestId) return; // a newer hover has superseded this one
+
+      const hit = results.find(({ value }) => Number.isFinite(value));
+      if (!hit) {
+        hideTooltip();
+        return;
+      }
+
+      const unit = hit.layer.unit ? ` ${hit.layer.unit}` : '';
+      tooltipEl.textContent = `${hit.layer.label}: ${hit.value.toFixed(2)}${unit}`;
+      tooltipEl.style.left = `${e.point.x + 14}px`;
+      tooltipEl.style.top = `${e.point.y + 14}px`;
+      tooltipEl.style.display = 'block';
+    });
+  }
+
+  map.on('mousemove', (e) => {
+    if (hoverTimeout) return;
+    hoverTimeout = setTimeout(() => {
+      hoverTimeout = null;
+      updateTooltip(e);
+    }, 50);
+  });
+
+  map.on('mouseout', hideTooltip);
 
   map.on('load', () => {
     config.layers.forEach((layer) => {

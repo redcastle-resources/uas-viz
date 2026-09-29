@@ -3,7 +3,7 @@
 //   - Reprojected to EPSG:3857 (Web Mercator) — maplibre-cog-protocol does not reproject.
 //   - Single-band elevation/difference data, ideally LERC-compressed with a NaN/nodata value set.
 //   - Hosted somewhere that supports HTTP Range requests (GCS, S3, Cloudflare R2, etc.).
-window.DEM_CONFIG = {
+window.DTM_CONFIG = {
   // Plain raster XYZ basemap (CARTO Positron, no API key required) rendered
   // as a flat MapLibre style — no vector fragments, no 3D terrain/buildings,
   // and (unlike Mapbox GL JS's "Standard" style) no globe projection to fight
@@ -36,7 +36,7 @@ window.DEM_CONFIG = {
   // cheatsheet: https://labs.geomatico.es/maplibre-cog-protocol/color-cheatsheet.html
   // min/max below were measured from each hosted COG's actual valid-pixel
   // range (excluding nodata) via rasterio over /vsicurl/.
-  // The two AOI5 DEMs and two AOI6 DEMs share a range so pre/post are visually comparable.
+  // The two AOI5 DTMs and two AOI6 DTMs share a range so pre/post are visually comparable.
   // Layers that share a `group` key are toggled together in the panel as a single
   // checkbox (e.g. AOI5 + AOI6 pre-treatment hillshades); `groupLabel` names that checkbox.
   layers: [
@@ -95,6 +95,7 @@ window.DEM_CONFIG = {
       min: -1.7,
       max: 1.7,
       reverse: true, // reversed so gain (positive) reads blue and loss (negative) reads red
+      unit: 'm',
     },
     {
       id: 'diff_gumridge6',
@@ -107,6 +108,7 @@ window.DEM_CONFIG = {
       min: -1.4,
       max: 1.4,
       reverse: true, // reversed so gain (positive) reads blue and loss (negative) reads red
+      unit: 'm',
     },
   ],
 };

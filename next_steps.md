@@ -5,5 +5,5 @@
 - Add analytics: Basic height slice peak count etc
 - Ian suggests I can use the Askterra backend if needed
 
-## Potential Features - DEM
-- Try replicating the DEM viewer in deck.gl-raster, with the goal of calculating the post-treatment minus pre-treatment difference on the fly in the browser; compare the result with the existing precomputed difference COG.
+## Potential Features - DTM
+- Try replicating the DTM viewer in deck.gl-raster, with the goal of calculating the post-treatment minus pre-treatment difference on the fly in the browser; compare the result with the existing precomputed difference COG.

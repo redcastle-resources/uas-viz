@@ -2,8 +2,8 @@
 potree-static-site/pointclouds/*
 !potree-static-site/pointclouds/.gitkeep
 
-# DEM COGs are hosted on object storage too — keep local test data out of git.
-dem-static-site/data/*
-!dem-static-site/data/.gitkeep
+# DTM COGs are hosted on object storage too — keep local test data out of git.
+dtm-static-site/data/*
+!dtm-static-site/data/.gitkeep
 
 .env
