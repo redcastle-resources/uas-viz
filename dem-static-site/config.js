@@ -4,42 +4,94 @@
 //   - Single-band elevation/difference data, ideally LERC-compressed with a NaN/nodata value set.
 //   - Hosted somewhere that supports HTTP Range requests (GCS, S3, Cloudflare R2, etc.).
 window.DEM_CONFIG = {
-  // Base URL where the 3 COG files are hosted. Re-uses the same public GCS bucket
+  // Plain raster XYZ basemap (CARTO Positron, no API key required) rendered
+  // as a flat MapLibre style — no vector fragments, no 3D terrain/buildings,
+  // and (unlike Mapbox GL JS's "Standard" style) no globe projection to fight
+  // with at low zoom. Light/muted tiles keep the color-ramp overlays legible.
+  basemapStyle: {
+    version: 8,
+    sources: {
+      basemap: {
+        type: 'raster',
+        tiles: [
+          'https://basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png?key=cb1_43mw_1_b625104a56feb28a35a62b18',
+        ],
+        tileSize: 256,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      },
+    },
+    layers: [{ id: 'basemap', type: 'raster', source: 'basemap' }],
+  },
+
+  // Base URL where the COG files are hosted. Re-uses the same public GCS bucket
   // pattern as potree-static-site/index.html (see gcs-cors.json for the CORS config).
-  cogBaseUrl: 'https://storage.googleapis.com/uas-viz/dem_tifs',
+  cogBaseUrl: 'https://storage.googleapis.com/uas-viz/cogs',
 
   // Initial map view — update to center on your AOI.
-  center: [-120.0, 39.0],
-  zoom: 12,
+  center: [-89.511348, 37.799616],
+
+  zoom: 16,
 
   // One entry per raster. `colorRamp` names come from the ColorBrewer/CARTOColor
   // cheatsheet: https://labs.geomatico.es/maplibre-cog-protocol/color-cheatsheet.html
+  // min/max below were measured from each hosted COG's actual valid-pixel
+  // range (excluding nodata) via rasterio over /vsicurl/.
+  // The two AOI5 DEMs and two AOI6 DEMs share a range so pre/post are visually comparable.
   layers: [
     {
-      id: 'pre',
-      label: 'Pre-treatment DEM',
-      file: 'pre_treatment.tif',
+      id: 'pre_gumridge5',
+      label: 'Pre-treatment DTM',
+      file: '2025/GumRidge5_DTM.tif',
       colorRamp: 'BrewerYlGn9',
-      min: 1400,
-      max: 2200,
+      min: 178,
+      max: 216,
       reverse: false,
     },
     {
-      id: 'post',
-      label: 'Post-treatment DEM',
-      file: 'post_treatment.tif',
+      id: 'pre_gumridge6',
+      label: 'Pre-treatment DTM',
+      file: '2025/GumRidge6_DTM.tif',
       colorRamp: 'BrewerYlGn9',
-      min: 1400,
-      max: 2200,
+      min: 184,
+      max: 219,
       reverse: false,
     },
     {
-      id: 'diff',
+      id: 'post_gumridge5',
+      label: 'Post-treatment DTM',
+      file: '2026/AOI5_DTM.tif',
+      colorRamp: 'BrewerYlGn9',
+      min: 178,
+      max: 216,
+      reverse: false,
+    },
+    {
+      id: 'post_gumridge6',
+      label: 'Post-treatment DTM',
+      file: '2026/AOI6_DTM.tif',
+      colorRamp: 'BrewerYlGn9',
+      min: 184,
+      max: 219,
+      reverse: false,
+    },
+    {
+      id: 'diff_gumridge5',
       label: 'Difference (Post \u2212 Pre)',
-      file: 'difference.tif',
+      file: 'difference/AOI5_Difference26_25.tif',
       colorRamp: 'BrewerRdBu11',
-      min: -5,
-      max: 5,
+      // Symmetric around 0 (actual range was -0.69/+1.68) so "no change" renders mid-ramp.
+      min: -1.7,
+      max: 1.7,
+      reverse: true, // reversed so gain (positive) reads blue and loss (negative) reads red
+    },
+    {
+      id: 'diff_gumridge6',
+      label: 'Difference (Post \u2212 Pre)',
+      file: 'difference/AOI6_Difference26_25.tif',
+      colorRamp: 'BrewerRdBu11',
+      // Symmetric around 0 (actual range was -0.88/+1.38) so "no change" renders mid-ramp.
+      min: -1.4,
+      max: 1.4,
       reverse: true, // reversed so gain (positive) reads blue and loss (negative) reads red
     },
   ],

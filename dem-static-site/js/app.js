@@ -9,7 +9,7 @@
 
   const map = new maplibregl.Map({
     container: 'map',
-    style: 'https://demotiles.maplibre.org/style.json',
+    style: config.basemapStyle,
     center: config.center,
     zoom: config.zoom,
   });
@@ -23,16 +23,32 @@
 
   let activeId = config.layers[0].id;
 
-  function setActiveLayer(id) {
-    activeId = id;
-    config.layers.forEach((layer) => {
-      if (map.getLayer(layer.id)) {
-        map.setLayoutProperty(layer.id, 'visibility', layer.id === id ? 'visible' : 'none');
-      }
-    });
+  function setActiveLayer(id, visible) {
+    if (map.getLayer(id)) {
+      map.setLayoutProperty(id, 'visibility', visible ? 'visible' : 'none');
+    }
+
+    if (visible) {
+      activeId = id;
+    } else if (activeId === id) {
+      activeId = [...config.layers].reverse().find((layer) => {
+        return map.getLayer(layer.id)
+          && map.getLayoutProperty(layer.id, 'visibility') === 'visible';
+      })?.id;
+    }
+
     const opacitySlider = document.getElementById('opacity-slider');
-    opacitySlider.value = 100;
-    renderLegend(config.layers.find((layer) => layer.id === id));
+    const activeLayer = config.layers.find((layer) => layer.id === activeId);
+    opacitySlider.disabled = !activeLayer;
+    if (activeLayer) {
+      opacitySlider.value = 100;
+      renderLegend(activeLayer);
+    } else {
+      document.querySelector('#legend .legend-title').textContent = 'No layers visible';
+      document.querySelector('#legend .legend-gradient').style.background = 'none';
+      document.querySelector('#legend .legend-min').textContent = '';
+      document.querySelector('#legend .legend-max').textContent = '';
+    }
   }
 
   function renderLegend(layer) {
@@ -74,10 +90,12 @@
       const label = document.createElement('label');
       label.className = 'layer-option';
       label.innerHTML = `
-        <input type="radio" name="layer" value="${layer.id}" ${index === 0 ? 'checked' : ''} />
+        <input type="checkbox" value="${layer.id}" ${index === 0 ? 'checked' : ''} />
         <span>${layer.label}</span>
       `;
-      label.querySelector('input').addEventListener('change', () => setActiveLayer(layer.id));
+      label.querySelector('input').addEventListener('change', (event) => {
+        setActiveLayer(layer.id, event.target.checked);
+      });
       optionsEl.appendChild(label);
     });
 
@@ -106,6 +124,6 @@
     });
 
     buildPanel();
-    setActiveLayer(activeId);
+    setActiveLayer(activeId, true);
   });
 })();

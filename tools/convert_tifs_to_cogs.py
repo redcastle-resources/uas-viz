@@ -33,6 +33,13 @@ DEFAULT_OVERVIEW_RESAMPLING = "average"
 DEFAULT_COMPRESSION = "LERC"
 DEFAULT_MAX_Z_ERROR = "0.1"
 DEFAULT_TARGET_SRS = "EPSG:3857"
+# GDAL's TILING_SCHEME snaps the raster to the closest Web Mercator zoom level.
+# The default AUTO strategy picks whichever zoom is numerically closest, which
+# can round *down* and silently throw away up to half of the source's native
+# resolution. UPPER always rounds up (oversampling slightly) so the COG never
+# has coarser resolution than the source — this is what keeps high-resolution
+# UAS outputs looking sharp once viewed in the browser.
+DEFAULT_ZOOM_LEVEL_STRATEGY = "UPPER"
 
 try:
     from osgeo import gdal
@@ -114,6 +121,7 @@ def convert_tif(
     resampling: str,
     overview_resampling: str,
     max_z_error: str,
+    zoom_level_strategy: str,
     overwrite: bool,
 ) -> None:
     if output.exists() and not overwrite:
@@ -143,6 +151,7 @@ def convert_tif(
                 f"MAX_Z_ERROR={max_z_error}",
                 f"RESAMPLING={resampling.upper()}",
                 f"OVERVIEW_RESAMPLING={overview_resampling.upper()}",
+                f"ZOOM_LEVEL_STRATEGY={zoom_level_strategy.upper()}",
                 "OVERVIEWS=IGNORE_EXISTING",
                 "ADD_ALPHA=NO",
             ],
@@ -173,6 +182,8 @@ def convert_tif(
         f"RESAMPLING={resampling.upper()}",
         "-co",
         f"OVERVIEW_RESAMPLING={overview_resampling.upper()}",
+        "-co",
+        f"ZOOM_LEVEL_STRATEGY={zoom_level_strategy.upper()}",
         "-co",
         "OVERVIEWS=IGNORE_EXISTING",
         "-co",
@@ -237,6 +248,18 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         help=f"COG MAX_Z_ERROR creation option (default: {DEFAULT_MAX_Z_ERROR}).",
     )
     parser.add_argument(
+        "--zoom-level-strategy",
+        default=DEFAULT_ZOOM_LEVEL_STRATEGY,
+        choices=["AUTO", "LOWER", "UPPER"],
+        help=(
+            "COG ZOOM_LEVEL_STRATEGY creation option (default: "
+            f"{DEFAULT_ZOOM_LEVEL_STRATEGY}). UPPER keeps the full native "
+            "resolution of the source raster (recommended for high-res UAS "
+            "outputs); AUTO (GDAL's own default) rounds to the nearest zoom "
+            "level and can quietly downsample."
+        ),
+    )
+    parser.add_argument(
         "--overwrite",
         action="store_true",
         help="Replace existing outputs.",
@@ -292,6 +315,7 @@ def main(argv: list[str]) -> int:
             resampling=args.resampling,
             overview_resampling=args.overview_resampling,
             max_z_error=args.max_z_error,
+            zoom_level_strategy=args.zoom_level_strategy,
             overwrite=args.overwrite,
         )
 

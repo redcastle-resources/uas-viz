@@ -77,8 +77,13 @@ gdalwarp pre_treatment_source.tif pre_treatment.tif -of COG \
   -co TILING_SCHEME=GoogleMapsCompatible \
   -co COMPRESS=LERC -co MAX_Z_ERROR=0.1 \
   -co RESAMPLING=BILINEAR -co OVERVIEW_RESAMPLING=AVERAGE \
+  -co ZOOM_LEVEL_STRATEGY=UPPER \
   -co OVERVIEWS=IGNORE_EXISTING -co ADD_ALPHA=NO
 ```
+
+`tools/convert_tifs_to_cogs.py` wraps this with the same defaults (including
+`ZOOM_LEVEL_STRATEGY=UPPER`, needed to keep high-resolution UAS rasters from
+being silently downsampled when snapped to the Web Mercator tiling scheme).
 
 To convert local rasters to COGs and upload them to Google Cloud Storage in
 one step, use the wrapper:
