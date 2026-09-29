@@ -105,6 +105,13 @@ def build_destination(destination_prefix: str, relative_path: str | Path) -> str
     return prefix + PurePosixPath(Path(relative_path).as_posix()).as_posix()
 
 
+def build_command(executable: str, arguments: list[str]) -> tuple[list[str] | str, bool]:
+    if sys.platform.startswith("win") and executable.lower().endswith((".cmd", ".bat")):
+        command_line = subprocess.list2cmdline([executable, *arguments])
+        return command_line, True
+    return [executable, *arguments], False
+
+
 def gcloud_path() -> str | None:
     resolved = shutil.which("gcloud")
     if resolved:
@@ -139,23 +146,47 @@ def upload_file(
     overwrite: bool,
     dry_run: bool,
 ) -> None:
-    command = [gcloud_executable, "storage", "cp"]
+    command_arguments = ["storage", "cp"]
     if not overwrite:
-        command.append("--no-clobber")
+        command_arguments.append("--no-clobber")
     if acl:
-        command.extend(["-a", acl])
-    command.extend([
+        command_arguments.extend(["-a", acl])
+    command_arguments.extend([
         f"--content-type={content_type}",
         f"--cache-control={cache_control}",
         str(source),
         destination,
     ])
 
+    command, use_shell = build_command(gcloud_executable, command_arguments)
+
     status(f"upload {source} -> {destination}")
     if dry_run:
         return
 
-    subprocess.run(command, check=True)
+    try:
+        completed = subprocess.run(
+            command,
+            check=True,
+            capture_output=True,
+            text=True,
+            shell=use_shell,
+        )
+    except subprocess.CalledProcessError as error:
+        if error.stdout:
+            print(error.stdout, file=sys.stderr, end="")
+        if error.stderr:
+            print(error.stderr, file=sys.stderr, end="")
+        print(
+            f"error: upload failed for {source} -> {destination} (exit code {error.returncode})",
+            file=sys.stderr,
+        )
+        raise SystemExit(error.returncode) from None
+
+    if completed.stdout:
+        print(completed.stdout, end="")
+    if completed.stderr:
+        print(completed.stderr, file=sys.stderr, end="")
 
 
 def main(argv: list[str]) -> int:

@@ -85,10 +85,18 @@ gdalwarp pre_treatment_source.tif pre_treatment.tif -of COG \
 `ZOOM_LEVEL_STRATEGY=UPPER`, needed to keep high-resolution UAS rasters from
 being silently downsampled when snapped to the Web Mercator tiling scheme).
 
-To upload local rasters to Google Cloud Storage, use the helper script:
+To convert local rasters to COGs and upload them to Google Cloud Storage in
+one step, use the wrapper:
 
 ```powershell
-python tools/upload_cogs_to_gcs.py .\data -d gs://uas-viz/dem_tifs
+python tools/convert_and_upload_cogs.py .\data -d gs://uas-viz/dem_tifs
+```
+
+If you already have converted COGs on disk and only want to upload them, keep
+using the upload helper directly:
+
+```powershell
+python tools/upload_cogs_to_gcs.py D:\FY26\uas\cogs -d gs://uas-viz/cogs
 ```
 
 Local serving:
@@ -123,17 +131,19 @@ Then open `http://localhost:8080/`.
 
 ## Google Cloud Storage Uploads
 
-[`tools/upload_cogs_to_gcs.py`](tools/upload_cogs_to_gcs.py) uploads `.tif`
-and `.tiff` files to a `gs://` prefix while preserving subdirectory structure.
-It sets `Content-Type: image/tiff` and a long-lived cache policy by default.
+[`tools/convert_and_upload_cogs.py`](tools/convert_and_upload_cogs.py) turns
+source GeoTIFFs into COGs and uploads them to a `gs://` prefix in one step.
+If you already have COGs, [`tools/upload_cogs_to_gcs.py`](tools/upload_cogs_to_gcs.py)
+uploads `.tif` and `.tiff` files while preserving subdirectory structure. Both
+scripts set long-lived cache-friendly metadata by default.
 
-The script requires `gsutil` and expects a destination that starts with
-`gs://`.
+Both scripts require the Google Cloud SDK and expect a destination that starts
+with `gs://`.
 
 Example:
 
 ```powershell
-python tools/upload_cogs_to_gcs.py D:\FY26\uas\cogs -d gs://uas-viz/cogs
+python tools/convert_and_upload_cogs.py D:\FY26\uas\cogs -d gs://uas-viz/cogs
 ```
 
 ## Range-Supporting Local Servers

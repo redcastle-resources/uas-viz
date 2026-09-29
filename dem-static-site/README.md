@@ -87,7 +87,14 @@ gs://uas-viz/dem_tifs/post_treatment.tif
 gs://uas-viz/dem_tifs/difference.tif
 ```
 
-If you want a small helper script for GCS uploads, use:
+If you want a small helper script to convert the rasters to COGs and upload
+them to GCS in one step, use:
+
+```powershell
+python ..\tools\convert_and_upload_cogs.py .\data -d gs://uas-viz/dem_tifs
+```
+
+If you already have COGs and only want to upload them, use the upload helper:
 
 ```powershell
 python ..\tools\upload_cogs_to_gcs.py .\data -d gs://uas-viz/dem_tifs
