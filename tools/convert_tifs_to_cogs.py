@@ -10,7 +10,7 @@ Defaults are tuned for the DEM workflow in this repo:
 - reproject to EPSG:3857
 - write COG output
 - use LERC compression
-- assume NaN nodata for float elevation rasters
+- preserve the source nodata value when present, otherwise fall back to NaN
 
 Example:
 
@@ -21,6 +21,7 @@ Example:
 from __future__ import annotations
 
 import argparse
+import json
 import shutil
 import subprocess
 import sys
@@ -43,6 +44,55 @@ def status(message: str) -> None:
     print(message, flush=True)
 
 
+def format_nodata_value(value: float | int | str) -> str:
+    if isinstance(value, str):
+        return value
+    if isinstance(value, float) and value.is_integer():
+        return str(int(value))
+    return str(value)
+
+
+def detect_source_nodata(source: Path) -> str | None:
+    if gdal is not None:
+        dataset = gdal.Open(str(source), gdal.GA_ReadOnly)
+        if dataset is None:
+            return None
+
+        try:
+            band = dataset.GetRasterBand(1)
+            if band is None:
+                return None
+
+            nodata_value = band.GetNoDataValue()
+            if nodata_value is None:
+                return None
+
+            return format_nodata_value(nodata_value)
+        finally:
+            dataset = None
+
+    gdalinfo = shutil.which("gdalinfo")
+    if gdalinfo is None:
+        return None
+
+    completed = subprocess.run(
+        [gdalinfo, "-json", str(source)],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    info = json.loads(completed.stdout)
+    bands = info.get("bands") or []
+    if not bands:
+        return None
+
+    nodata_value = bands[0].get("noDataValue")
+    if nodata_value is None:
+        return None
+
+    return format_nodata_value(nodata_value)
+
+
 def iter_tifs(source: Path) -> list[Path]:
     if source.is_file():
         return [source]
@@ -60,7 +110,7 @@ def convert_tif(
     *,
     target_srs: str,
     compression: str,
-    nodata: str,
+    nodata: str | None,
     resampling: str,
     overview_resampling: str,
     max_z_error: str,
@@ -72,6 +122,10 @@ def convert_tif(
 
     output.parent.mkdir(parents=True, exist_ok=True)
 
+    resolved_nodata = nodata if nodata is not None else detect_source_nodata(source)
+    if resolved_nodata is None:
+        resolved_nodata = "nan"
+
     status(f"start {source}")
     status(f"write {output}")
 
@@ -81,8 +135,8 @@ def convert_tif(
             dstSRS=target_srs,
             format="COG",
             resampleAlg=resampling,
-            srcNodata=nodata,
-            dstNodata=nodata,
+            srcNodata=resolved_nodata,
+            dstNodata=resolved_nodata,
             creationOptions=[
                 "TILING_SCHEME=GoogleMapsCompatible",
                 f"COMPRESS={compression}",
@@ -158,8 +212,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     )
     parser.add_argument(
         "--nodata",
-        default="nan",
-        help="Nodata value to set on the output (default: nan).",
+        default=None,
+        help=(
+            "Override the output nodata value. By default, the source raster's "
+            "nodata value is used when present; otherwise nan is used."
+        ),
     )
     parser.add_argument(
         "--resampling",
