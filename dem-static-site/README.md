@@ -146,3 +146,21 @@ This folder is deployed alongside the Potree viewer by
   `config.js` (`basemapStyle`). Raster overlays are added on top with no
   slot/ordering system needed since the basemap has no labels or 3D
   fragments — see `js/app.js` if you want to swap in a different basemap.
+
+## Nodata masking
+
+All 6 hosted COGs (`2025/GumRidge5_DTM.tif`, `2025/GumRidge6_DTM.tif`,
+`2026/AOI5_DTM.tif`, `2026/AOI6_DTM.tif`,
+`difference/AOI5_Difference26_25.tif`, `difference/AOI6_Difference26_25.tif`)
+are float32 with `nodata = NaN` (verified via `rasterio` over `/vsicurl/`),
+matching the `--nodata nan` default in `tools/convert_tifs_to_cogs.py`.
+
+No extra config is needed to mask these out: `maplibre-cog-protocol` reads
+the `GDAL_NODATA` TIFF tag from each COG automatically and renders any pixel
+matching that value (here, `NaN`) as fully transparent (`alpha = 0`) before
+handing tiles to MapLibre — see `cogProtocol`/`vB`/`lI` in
+[`maplibre-cog-protocol`'s bundle](https://unpkg.com/@geomatico/maplibre-cog-protocol/dist/index.js).
+If a future raster is missing/incorrect nodata, re-run
+`gdal_edit.py -a_nodata nan your_raster.tif` (or re-export with
+`tools/convert_tifs_to_cogs.py`, whose default `--nodata` is `nan`) before
+uploading — no changes to `config.js`/`js/app.js` are required for masking.
