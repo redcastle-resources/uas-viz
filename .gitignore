@@ -1,3 +1,7 @@
 # Point cloud data now lives in GCS (gs://uas-viz/pointclouds) — too large for git.
 potree-static-site/pointclouds/*
 !potree-static-site/pointclouds/.gitkeep
+
+# DEM COGs are hosted on object storage too — keep local test data out of git.
+dem-static-site/data/*
+!dem-static-site/data/.gitkeep

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UAS Viz</title>
+    <style>
+      :root {
+        --bg: #0f172a;
+        --panel: rgba(15, 23, 42, 0.9);
+        --text: #e2e8f0;
+        --muted: #94a3b8;
+        --accent: #38bdf8;
+        --border: rgba(148, 163, 184, 0.2);
+      }
+
+      html, body {
+        margin: 0;
+        height: 100%;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Arial, Helvetica, sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      main {
+        max-width: 480px;
+        padding: 24px;
+      }
+
+      h1 {
+        font-size: 22px;
+        margin-bottom: 4px;
+      }
+
+      p {
+        color: var(--muted);
+      }
+
+      .links {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 20px;
+      }
+
+      a.card {
+        display: block;
+        padding: 16px 18px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: var(--panel);
+        color: var(--text);
+        text-decoration: none;
+      }
+
+      a.card:hover {
+        border-color: var(--accent);
+      }
+
+      a.card .name {
+        font-weight: 700;
+        color: var(--accent);
+      }
+
+      a.card .desc {
+        display: block;
+        margin-top: 4px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>UAS Viz</h1>
+      <p>Static viewers for UAS-derived point clouds and DEM rasters.</p>
+      <div class="links">
+        <a class="card" href="./potree/">
+          <span class="name">Potree Point Cloud Viewer</span>
+          <span class="desc">3D point cloud viewer for lidar/photogrammetry data.</span>
+        </a>
+        <a class="card" href="./dem/">
+          <span class="name">DEM Viewer</span>
+          <span class="desc">Pre-treatment, post-treatment, and difference elevation rasters.</span>
+        </a>
+      </div>
+    </main>
+  </body>
+</html>

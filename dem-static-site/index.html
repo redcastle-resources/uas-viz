@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DEM Viewer — Pre / Post / Difference</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.css" />
+    <link rel="stylesheet" href="./css/style.css" />
+  </head>
+
+  <body>
+    <div id="topbar">
+      <div id="title">DEM Viewer: Pre-treatment / Post-treatment / Difference</div>
+    </div>
+
+    <div id="app">
+      <div id="map"></div>
+
+      <div id="panel">
+        <h2>Layer</h2>
+        <div id="layer-options"></div>
+        <div id="opacity-row">
+          <label for="opacity-slider">Opacity</label>
+          <input id="opacity-slider" type="range" min="0" max="100" value="100" />
+        </div>
+      </div>
+
+      <div id="legend">
+        <div class="legend-title"></div>
+        <div class="legend-gradient"></div>
+        <div class="legend-scale">
+          <span class="legend-min"></span>
+          <span class="legend-max"></span>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.js"></script>
+    <script src="https://unpkg.com/@geomatico/maplibre-cog-protocol/dist/index.js"></script>
+    <script src="./config.js"></script>
+    <script src="./js/app.js"></script>
+  </body>
+</html>

@@ -1,10 +1,12 @@
-name: Deploy Potree viewer to GitHub Pages
+name: Deploy static sites to GitHub Pages
 
 on:
   push:
     branches: [main]
     paths:
       - "potree-static-site/**"
+      - "dem-static-site/**"
+      - "landing-page/**"
       - ".github/workflows/deploy-pages.yml"
   # Manually re-run from the Actions tab if a push-triggered run fails (e.g. repo was private).
   workflow_dispatch:
@@ -28,13 +30,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Combine the landing page + both viewers into one artifact:
+      #   /            -> landing-page/index.html
+      #   /potree/...  -> potree-static-site/
+      #   /dem/...     -> dem-static-site/
+      - name: Assemble combined site
+        run: |
+          mkdir -p _site/potree _site/dem
+          cp -r potree-static-site/. _site/potree/
+          cp -r dem-static-site/. _site/dem/
+          cp landing-page/index.html _site/index.html
+
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: potree-static-site
+          path: _site
 
       - name: Deploy to GitHub Pages
         id: deployment
