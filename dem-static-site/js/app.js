@@ -21,28 +21,47 @@
     return `cog://${config.cogBaseUrl}/${layer.file}#color:${ramp}`;
   }
 
-  let activeId = config.layers[0].id;
-
-  function setActiveLayer(id, visible) {
-    if (map.getLayer(id)) {
-      map.setLayoutProperty(id, 'visibility', visible ? 'visible' : 'none');
+  // Layers sharing a `group` key are collapsed into a single panel entry/checkbox
+  // so e.g. the AOI5 + AOI6 pre-treatment hillshades toggle together.
+  const groups = [];
+  const groupsByKey = new Map();
+  config.layers.forEach((layer) => {
+    const key = layer.group || layer.id;
+    if (!groupsByKey.has(key)) {
+      const group = { key, label: layer.groupLabel || layer.label, layers: [] };
+      groupsByKey.set(key, group);
+      groups.push(group);
     }
+    groupsByKey.get(key).layers.push(layer);
+  });
+
+  function isGroupVisible(group) {
+    return group.layers.some((layer) => {
+      return map.getLayer(layer.id) && map.getLayoutProperty(layer.id, 'visibility') === 'visible';
+    });
+  }
+
+  let activeGroupKey = groups[0].key;
+
+  function setActiveGroup(group, visible) {
+    group.layers.forEach((layer) => {
+      if (map.getLayer(layer.id)) {
+        map.setLayoutProperty(layer.id, 'visibility', visible ? 'visible' : 'none');
+      }
+    });
 
     if (visible) {
-      activeId = id;
-    } else if (activeId === id) {
-      activeId = [...config.layers].reverse().find((layer) => {
-        return map.getLayer(layer.id)
-          && map.getLayoutProperty(layer.id, 'visibility') === 'visible';
-      })?.id;
+      activeGroupKey = group.key;
+    } else if (activeGroupKey === group.key) {
+      activeGroupKey = [...groups].reverse().find(isGroupVisible)?.key;
     }
 
     const opacitySlider = document.getElementById('opacity-slider');
-    const activeLayer = config.layers.find((layer) => layer.id === activeId);
-    opacitySlider.disabled = !activeLayer;
-    if (activeLayer) {
+    const activeGroup = groups.find((g) => g.key === activeGroupKey);
+    opacitySlider.disabled = !activeGroup;
+    if (activeGroup) {
       opacitySlider.value = 100;
-      renderLegend(activeLayer);
+      renderLegend(activeGroup.layers[0]);
     } else {
       document.querySelector('#legend .legend-title').textContent = 'No layers visible';
       document.querySelector('#legend .legend-gradient').style.background = 'none';
@@ -86,29 +105,35 @@
 
   function buildPanel() {
     const optionsEl = document.getElementById('layer-options');
-    config.layers.forEach((layer, index) => {
+    groups.forEach((group, index) => {
       const label = document.createElement('label');
       label.className = 'layer-option';
       label.innerHTML = `
-        <input type="checkbox" value="${layer.id}" ${index === 0 ? 'checked' : ''} />
-        <span>${layer.label}</span>
+        <input type="checkbox" value="${group.key}" ${index === 0 ? 'checked' : ''} />
+        <span>${group.label}</span>
       `;
       label.querySelector('input').addEventListener('change', (event) => {
-        setActiveLayer(layer.id, event.target.checked);
+        setActiveGroup(group, event.target.checked);
       });
       optionsEl.appendChild(label);
     });
 
     document.getElementById('opacity-slider').addEventListener('input', (event) => {
       const opacity = Number(event.target.value) / 100;
-      if (map.getLayer(activeId)) {
-        map.setPaintProperty(activeId, 'raster-opacity', opacity);
+      const activeGroup = groups.find((g) => g.key === activeGroupKey);
+      if (activeGroup) {
+        activeGroup.layers.forEach((layer) => {
+          if (map.getLayer(layer.id)) {
+            map.setPaintProperty(layer.id, 'raster-opacity', opacity);
+          }
+        });
       }
     });
   }
 
   map.on('load', () => {
-    config.layers.forEach((layer, index) => {
+    config.layers.forEach((layer) => {
+      const groupIndex = groups.findIndex((g) => g.key === (layer.group || layer.id));
       map.addSource(layer.id, {
         type: 'raster',
         url: cogUrlFor(layer),
@@ -118,12 +143,12 @@
         id: layer.id,
         type: 'raster',
         source: layer.id,
-        layout: { visibility: index === 0 ? 'visible' : 'none' },
+        layout: { visibility: groupIndex === 0 ? 'visible' : 'none' },
         paint: { 'raster-opacity': 1 },
       });
     });
 
     buildPanel();
-    setActiveLayer(activeId, true);
+    setActiveGroup(groups[0], true);
   });
 })();

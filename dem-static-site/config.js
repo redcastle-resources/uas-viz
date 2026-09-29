@@ -27,29 +27,24 @@ window.DEM_CONFIG = {
   // pattern as potree-static-site/index.html (see gcs-cors.json for the CORS config).
   cogBaseUrl: 'https://storage.googleapis.com/uas-viz/cogs',
 
-  // Initial map view — update to center on your AOI.
-  center: [-89.511348, 37.799616],
+  // Map centered on the AOI footprint 
+  center: [-89.514280, 37.799070],
 
-  zoom: 16,
+  zoom: 17.5,
 
   // One entry per raster. `colorRamp` names come from the ColorBrewer/CARTOColor
   // cheatsheet: https://labs.geomatico.es/maplibre-cog-protocol/color-cheatsheet.html
   // min/max below were measured from each hosted COG's actual valid-pixel
   // range (excluding nodata) via rasterio over /vsicurl/.
   // The two AOI5 DEMs and two AOI6 DEMs share a range so pre/post are visually comparable.
+  // Layers that share a `group` key are toggled together in the panel as a single
+  // checkbox (e.g. AOI5 + AOI6 pre-treatment hillshades); `groupLabel` names that checkbox.
   layers: [
-    {
-      id: 'pre_gumridge5',
-      label: 'Pre-treatment DTM',
-      file: '2025/GumRidge5_DTM.tif',
-      colorRamp: 'BrewerYlGn9',
-      min: 178,
-      max: 216,
-      reverse: false,
-    },
     {
       id: 'pre_gumridge5_hillshade',
       label: 'Pre-treatment Hillshade',
+      group: 'pre_hillshade',
+      groupLabel: 'Pre-treatment Hillshade (AOI 5 + 6)',
       file: '2025/GumRidge5_DTM_Hillshade.tif',
       colorRamp: 'BrewerGreys9',
       min: 0,
@@ -59,6 +54,8 @@ window.DEM_CONFIG = {
     {
       id: 'pre_gumridge6_hillshade',
       label: 'Pre-treatment Hillshade',
+      group: 'pre_hillshade',
+      groupLabel: 'Pre-treatment Hillshade (AOI 5 + 6)',
       file: '2025/GumRidge6_DTM_Hillshade.tif',
       colorRamp: 'BrewerGreys9',
       min: 0,
@@ -66,35 +63,10 @@ window.DEM_CONFIG = {
       reverse: true,
     },
     {
-      id: 'pre_gumridge6',
-      label: 'Pre-treatment DTM',
-      file: '2025/GumRidge6_DTM.tif',
-      colorRamp: 'BrewerYlGn9',
-      min: 184,
-      max: 219,
-      reverse: false,
-    },
-    {
-      id: 'post_gumridge5',
-      label: 'Post-treatment DTM',
-      file: '2026/AOI5_DTM.tif',
-      colorRamp: 'BrewerYlGn9',
-      min: 178,
-      max: 216,
-      reverse: false,
-    },
-    {
-      id: 'post_gumridge6',
-      label: 'Post-treatment DTM',
-      file: '2026/AOI6_DTM.tif',
-      colorRamp: 'BrewerYlGn9',
-      min: 184,
-      max: 219,
-      reverse: false,
-    },
-        {
       id: 'post_gumridge5_hillshade',
       label: 'Post-treatment Hillshade',
+      group: 'post_hillshade',
+      groupLabel: 'Post-treatment Hillshade (AOI 5 + 6)',
       file: '2026/AOI5_DTM_Hillshade.tif',
       colorRamp: 'BrewerGreys9',
       min: 0,
@@ -104,6 +76,8 @@ window.DEM_CONFIG = {
     {
       id: 'post_gumridge6_hillshade',
       label: 'Post-treatment Hillshade',
+      group: 'post_hillshade',
+      groupLabel: 'Post-treatment Hillshade (AOI 5 + 6)',
       file: '2026/AOI6_DTM_Hillshade.tif',
       colorRamp: 'BrewerGreys9',
       min: 0,
@@ -113,6 +87,8 @@ window.DEM_CONFIG = {
     {
       id: 'diff_gumridge5',
       label: 'Difference (Post \u2212 Pre)',
+      group: 'diff',
+      groupLabel: 'Difference (AOI 5 + 6)',
       file: 'difference/AOI5_Difference26_25.tif',
       colorRamp: 'BrewerRdBu11',
       // Symmetric around 0 (actual range was -0.69/+1.68) so "no change" renders mid-ramp.
@@ -123,6 +99,8 @@ window.DEM_CONFIG = {
     {
       id: 'diff_gumridge6',
       label: 'Difference (Post \u2212 Pre)',
+      group: 'diff',
+      groupLabel: 'Difference (AOI 5 + 6)',
       file: 'difference/AOI6_Difference26_25.tif',
       colorRamp: 'BrewerRdBu11',
       // Symmetric around 0 (actual range was -0.88/+1.38) so "no change" renders mid-ramp.
