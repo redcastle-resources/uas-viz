@@ -12,6 +12,7 @@
         --muted: #94a3b8;
         --accent: #38bdf8;
         --warn: #f59e0b;
+        --border: rgba(148, 163, 184, 0.2);
       }
 
       html, body {
@@ -43,6 +44,34 @@
 
       #cloud-name {
         color: var(--accent);
+      }
+
+      .topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+
+      .site-nav {
+        display: flex;
+        gap: 12px;
+      }
+
+      .site-nav a {
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 13px;
+        padding: 4px 8px;
+        border-radius: 6px;
+      }
+
+      .site-nav a:hover {
+        color: var(--text);
+      }
+
+      .site-nav a.active {
+        color: var(--accent);
+        font-weight: 700;
       }
 
       #status {
@@ -78,6 +107,52 @@
       .fatal {
         color: var(--warn);
       }
+
+      #about-toggle {
+        padding: 6px 12px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--text);
+        font-size: 12px;
+        cursor: pointer;
+      }
+
+      #about-toggle:hover {
+        border-color: var(--accent);
+      }
+
+      .summary {
+        position: absolute;
+        top: 56px;
+        right: 16px;
+        left: 16px;
+        max-width: 560px;
+        margin-left: auto;
+        z-index: 20;
+        padding: 16px 18px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: var(--panel);
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .summary.hidden {
+        display: none;
+      }
+
+      .summary p {
+        margin: 0 0 12px;
+      }
+
+      .summary p:last-child {
+        margin-bottom: 0;
+      }
+
+      .summary a {
+        color: var(--accent);
+      }
     </style>
 
     <link rel="stylesheet" href="./vendor/potree/build/potree/potree.css" />
@@ -89,13 +164,27 @@
 
   <body>
     <div id="topbar">
-      <div id="title">Potree Cloud: <span id="cloud-name">mycloud</span></div>
+      <div class="topbar-left">
+        <div id="title">Potree Cloud: <span id="cloud-name">mycloud</span></div>
+        <nav class="site-nav">
+          <a href="../">Home</a>
+          <a class="active" href="./">Point Cloud</a>
+          <a href="../dtm/">DTM</a>
+        </nav>
+      </div>
       <div id="status">Waiting for point cloud…</div>
+      <button id="about-toggle" type="button">About</button>
     </div>
 
     <div id="potree_container">
       <div id="potree_render_area"></div>
       <div id="loading_info">Loading point cloud…</div>
+      <div id="about" class="summary hidden">
+        <p>This data was collected using unmanned aerial systems (UAS)-mounted lidar sensors at <a href="https://www.fs.usda.gov/r09/shawnee/recreation/trails/kinkaid-lake-trail-system" target="_blank" rel="noopener">Kinkaid Lake</a> in the <a href="https://www.fs.usda.gov/r09/shawnee" target="_blank" rel="noopener">Shawnee National Forest, Illinois</a>.</p>
+        <p>The objective of the project was to create detailed 3D models and digital terrain maps to track the impacts of erosion prevention projects in treed gullies.</p>
+        <p>Because these areas are challenging to access and survey using traditional methods, UAS-mounted lidar provides a practical solution for capturing high-resolution spatial data.</p>
+        <p>To learn more, visit the <a href="https://www.redcastleresources.com/blog" target="_blank" rel="noopener">project blog post</a>.</p>
+      </div>
     </div>
 
     <script src="./vendor/potree/libs/jquery/jquery-3.1.1.min.js"></script>
@@ -120,6 +209,9 @@
       ];
       const statusEl = document.getElementById('status');
       const loadingInfo = document.getElementById('loading_info');
+      document.getElementById('about-toggle').addEventListener('click', function () {
+        document.getElementById('about').classList.toggle('hidden');
+      });
 
       function setStatus(message, isFatal = false) {
         statusEl.textContent = message;

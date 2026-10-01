@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>UAS Viz</title>
+    <title>UAS Lidar and Digital Terrain Models</title>
     <style>
       :root {
         --bg: #0f172a;
@@ -20,13 +20,54 @@
         background: var(--bg);
         color: var(--text);
         font-family: Arial, Helvetica, sans-serif;
+      }
+
+      body {
         display: flex;
+        flex-direction: column;
+      }
+
+      #topbar {
+        display: flex;
+        justify-content: space-between;
         align-items: center;
-        justify-content: center;
+        padding: 12px 18px;
+        background: var(--panel);
+        border-bottom: 1px solid var(--border);
+      }
+
+      #title {
+        font-size: 16px;
+        font-weight: 700;
+      }
+
+      .site-nav {
+        display: flex;
+        gap: 12px;
+      }
+
+      .site-nav a {
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 13px;
+        padding: 4px 8px;
+        border-radius: 6px;
+      }
+
+      .site-nav a:hover {
+        color: var(--text);
+      }
+
+      .site-nav a.active {
+        color: var(--accent);
+        font-weight: 700;
       }
 
       main {
-        max-width: 480px;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         padding: 24px;
       }
 
@@ -71,21 +112,68 @@
         font-size: 13px;
         color: var(--muted);
       }
+
+      .content {
+        max-width: 640px;
+      }
+
+      .summary {
+        margin: 20px 0;
+        padding: 16px 18px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: var(--panel);
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .summary p {
+        margin: 0 0 12px;
+      }
+
+      .summary p:last-child {
+        margin-bottom: 0;
+      }
+
+      .summary a {
+        color: var(--accent);
+      }
+
+      .choose {
+        margin-top: 20px;
+      }
     </style>
   </head>
   <body>
+    <div id="topbar">
+      <div id="title">UAS Viz</div>
+      <nav class="site-nav">
+        <a class="active" href="./">Home</a>
+        <a href="./potree/">Point Cloud</a>
+        <a href="./dtm/">DTM</a>
+      </nav>
+    </div>
     <main>
+      <div class="content">
       <h1>UAS Viz</h1>
       <p>Static viewers for UAS-derived point clouds and DTM rasters.</p>
+      <div class="summary">
+        <p>This data was collected using unmanned aerial systems (UAS)-mounted lidar sensors at <a href="https://www.fs.usda.gov/r09/shawnee/recreation/trails/kinkaid-lake-trail-system" target="_blank" rel="noopener">Kinkaid Lake</a> in the <a href="https://www.fs.usda.gov/r09/shawnee" target="_blank" rel="noopener">Shawnee National Forest, Illinois</a>.</p>
+        <p>The objective of the project was to create detailed 3D models and digital terrain maps to track the impacts of erosion prevention projects in treed gullies.</p>
+        <p>Because these areas are challenging to access and survey using traditional methods, UAS-mounted lidar provides a practical solution for capturing high-resolution spatial data.</p>
+        <p>To learn more, visit the <a href="https://www.redcastleresources.com/blog" target="_blank" rel="noopener">project blog post</a>.</p>
+      </div>
+      <p class="choose">Choose a viewer to explore the data:</p>
       <div class="links">
         <a class="card" href="./potree/">
           <span class="name">Potree Point Cloud Viewer</span>
-          <span class="desc">3D point cloud viewer for lidar/photogrammetry data.</span>
+          <span class="desc">3D point cloud viewer for lidar data.</span>
         </a>
         <a class="card" href="./dtm/">
           <span class="name">DTM Viewer</span>
-          <span class="desc">Pre-treatment, post-treatment, and difference elevation rasters.</span>
+          <span class="desc">Digital terrain models (DTMs) and difference rasters for pre-treatment and post-treatment monitoring.</span>
         </a>
+      </div>
       </div>
     </main>
   </body>

@@ -11,7 +11,15 @@
 
   <body>
     <div id="topbar">
-      <div id="title">DTM Viewer: Pre-treatment / Post-treatment / Difference</div>
+      <div class="topbar-left">
+        <div id="title">DTM Viewer: Pre-treatment / Post-treatment / Difference</div>
+        <nav class="site-nav">
+          <a href="../">Home</a>
+          <a href="../potree/">Point Cloud</a>
+          <a class="active" href="./">DTM</a>
+        </nav>
+      </div>
+      <button id="about-toggle" type="button">About</button>
     </div>
 
     <div id="app">
@@ -35,11 +43,23 @@
           <span class="legend-max"></span>
         </div>
       </div>
+
+      <div id="about" class="summary hidden">
+        <p>This data was collected using unmanned aerial systems (UAS)-mounted lidar sensors at <a href="https://www.fs.usda.gov/r09/shawnee/recreation/trails/kinkaid-lake-trail-system" target="_blank" rel="noopener">Kinkaid Lake</a> in the <a href="https://www.fs.usda.gov/r09/shawnee" target="_blank" rel="noopener">Shawnee National Forest, Illinois</a>.</p>
+        <p>The objective of the project was to create detailed 3D models and digital terrain maps to track the impacts of erosion prevention projects in treed gullies.</p>
+        <p>Because these areas are challenging to access and survey using traditional methods, UAS-mounted lidar provides a practical solution for capturing high-resolution spatial data.</p>
+        <p>To learn more, visit the <a href="https://www.redcastleresources.com/blog" target="_blank" rel="noopener">project blog post</a>.</p>
+      </div>
     </div>
 
     <script src="https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.js"></script>
     <script src="https://unpkg.com/@geomatico/maplibre-cog-protocol/dist/index.js"></script>
     <script src="./config.js"></script>
     <script src="./js/app.js"></script>
+    <script>
+      document.getElementById('about-toggle').addEventListener('click', function () {
+        document.getElementById('about').classList.toggle('hidden');
+      });
+    </script>
   </body>
 </html>
