@@ -96,6 +96,8 @@ window.DTM_CONFIG = {
       max: 1.7,
       reverse: true, // reversed so gain (positive) reads blue and loss (negative) reads red
       unit: 'm',
+      // Difference layers default to partially transparent so the hillshade/basemap still shows through.
+      defaultOpacity: 0.5,
     },
     {
       id: 'diff_gumridge6',
@@ -109,6 +111,8 @@ window.DTM_CONFIG = {
       max: 1.4,
       reverse: true, // reversed so gain (positive) reads blue and loss (negative) reads red
       unit: 'm',
+      // Difference layers default to partially transparent so the hillshade/basemap still shows through.
+      defaultOpacity: 0.5,
     },
   ],
 };

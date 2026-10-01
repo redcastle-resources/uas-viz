@@ -47,6 +47,13 @@
     });
   }
 
+  // All layers in a group share one opacity slider; falls back to fully opaque
+  // when a layer doesn't set `defaultOpacity` in config.js.
+  function groupOpacity(group) {
+    const layer = group.layers[0];
+    return layer.defaultOpacity ?? 1;
+  }
+
   let activeGroupKey = groups[0].key;
 
   function setActiveGroup(group, visible) {
@@ -66,7 +73,7 @@
     const activeGroup = groups.find((g) => g.key === activeGroupKey);
     opacitySlider.disabled = !activeGroup;
     if (activeGroup) {
-      opacitySlider.value = 100;
+      opacitySlider.value = groupOpacity(activeGroup) * 100;
       renderLegend(activeGroup.layers[0]);
     } else {
       document.querySelector('#legend .legend-title').textContent = 'No layers visible';
@@ -206,7 +213,7 @@
         type: 'raster',
         source: layer.id,
         layout: { visibility: groupIndex === 0 ? 'visible' : 'none' },
-        paint: { 'raster-opacity': 1 },
+        paint: { 'raster-opacity': layer.defaultOpacity ?? 1 },
       });
     });
 
