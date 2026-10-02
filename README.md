@@ -1,12 +1,5 @@
 # uas-viz
 
-Tools, static sites, and upload helpers for UAV visualization workflows. The repository currently supports two main publishing paths:
-
-- `dtm-static-site/` for Cloud Optimized GeoTIFF (COG) raster viewers.
-- `potree-static-site/` for Potree point cloud viewers.
-
-The repo is intentionally lightweight: there is no central web application or backend service. Most work happens with local Python scripts, GDAL utilities, and static hosting.
-
 ## Summary 
 This repository provides tools and static site templates for visualizing UAV data, including DTM rasters and Potree point clouds. 
 
@@ -28,7 +21,7 @@ Typical workflow:
 
 ### DTM Raster Viewer
 
-[`dtm-static-site/`](dtm-static-site/) hosts a simple raster comparison viewer for pre-treatment, post-treatment, and difference COGs.
+[`dtm-static-site/`](dtm-static-site/) hosts a simple raster comparison viewer for pre-treatment, post-treatment, and difference COGs. The site uses MapLibre GL JS for rendering the rasters.
 
 ![DTM Viewer](img/dtm_preview.png)
 
