@@ -12,9 +12,43 @@ This repository provides tools and static site templates for visualizing UAV dat
 
 The repository is designed as a lightweight viewer to inspect and interact with UAV-derived geospatial data without the overhead of a full-fledged web application.
 
+### Point cloud viewer
+
+[`potree-static-site/`](potree-static-site/) hosts a [Potree](https://potree.github.io/)-based point cloud viewer.
+
+![Potree Viewer](img/point_cloud_preview.png)
+
+Typical workflow:
+
+1. Convert your point cloud data to the Potree format using the PotreeConverter.
+2. Upload the converted point cloud to a bucket or object store that supports HTTP Range requests.
+3. Update `potree-static-site/config.js` with the hosted point cloud URL and viewer settings.
+4. Serve the folder locally with the bundled range-aware server.
 
 
-## Requirements
+### DTM Raster Viewer
+
+[`dtm-static-site/`](dtm-static-site/) hosts a simple raster comparison viewer for pre-treatment, post-treatment, and difference COGs.
+
+![DTM Viewer](img/dtm_preview.png)
+
+Typical workflow:
+
+1. Generate or prepare three `EPSG:3857` COGs (pre-treatment, post-treatment, and difference) with GDAL.
+2. Upload them to a bucket or object store that supports HTTP Range requests.
+3. Update `dtm-static-site/config.js` with the hosted COG URL prefix and map view.
+4. Serve the folder locally with the bundled range-aware server.
+
+### Next steps
+
+Additional components that could be added include: 
+- Annotation tools for point clouds.
+- Measurement tools for distances and areas.
+- Integration with other geospatial data sources.
+- Custom styling and theming options for the viewer.
+
+
+## User Requirements
 
 Install the following before working in this repo:
 
@@ -53,16 +87,13 @@ node --version
 
 ## Python Environment
 
-The repo does not currently ship a single pinned package set. The helper
-scripts are small and mostly rely on the standard library plus external tools.
-If you want a dedicated environment, create one and install whatever your
-workflow requires, for example GDAL bindings and any raster-processing packages
-you use upstream.
+The repo does not currently ship a single pinned package set. The helper scripts are small and mostly rely on the standard library plus external tools.
+
+If you want a dedicated environment, create one and install whatever your workflow requires, for example GDAL bindings and any raster-processing packages you use upstream.
 
 ## DTM Static Site
 
-[`dtm-static-site/`](dtm-static-site/) hosts a simple raster comparison viewer
-for pre-treatment, post-treatment, and difference COGs.
+[`dtm-static-site/`](dtm-static-site/) hosts a simple raster comparison viewer for pre-treatment, post-treatment, and difference COGs.
 
 Typical workflow:
 
@@ -85,19 +116,15 @@ gdalwarp pre_treatment_source.tif pre_treatment.tif -of COG \
   -co OVERVIEWS=IGNORE_EXISTING -co ADD_ALPHA=NO
 ```
 
-`tools/convert_tifs_to_cogs.py` wraps this with the same defaults (including
-`ZOOM_LEVEL_STRATEGY=UPPER`, needed to keep high-resolution UAS rasters from
-being silently downsampled when snapped to the Web Mercator tiling scheme).
+`tools/convert_tifs_to_cogs.py` wraps this with the same defaults (including `ZOOM_LEVEL_STRATEGY=UPPER`, needed to keep high-resolution UAS rasters from being silently downsampled when snapped to the Web Mercator tiling scheme).
 
-To convert local rasters to COGs and upload them to Google Cloud Storage in
-one step, use the wrapper:
+To convert local rasters to COGs and upload them to Google Cloud Storage in one step, use the wrapper:
 
 ```powershell
 python tools/convert_and_upload_cogs.py .\data -d gs://uas-viz/dem_tifs
 ```
 
-If you already have converted COGs on disk and only want to upload them, keep
-using the upload helper directly:
+If you already have converted COGs on disk and only want to upload them, keepusing the upload helper directly:
 
 ```powershell
 python tools/upload_cogs_to_gcs.py D:\FY26\uas\cogs -d gs://uas-viz/cogs
